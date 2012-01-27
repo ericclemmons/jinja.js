@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="../lib/jinja.min.js"></script>
+        <script src="../lib/jinja.jquery.js"></script>
+    </head>
+    <body>
+        <script type="text/jinja" id="content">
+            {% let title = "jinja.js" %}
+            <h1>Welcome to {{ title|capitalize}}!</h1>
+
+            {% macro macro_test (tags) %}{{ tags|join(' & ') }}{% endmacro %}
+
+            {% include 'included' %}
+        </script>
+
+        <script type="text/jinja" id="included">
+            <p>
+                Supports tags like <code>{{ macro_test(['include', 'macro']) }}</code>!
+            </p>
+        </script>
+
+        <script>
+            $('#content').jinja();
+        </script>
+    </body>
+</html>

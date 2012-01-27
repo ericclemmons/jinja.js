@@ -4,6 +4,17 @@ Client-side rendering of Twig/Jinja/Jinjs templates.
 
 - - -
 
+## Demos
+
+You can find demos under the `/tests` folder:
+
+* [Basic Javascript](tests/01-vanilla.html)
+* [The `include` function](tests/02-include.html)
+* [The `extends` function](tests/03-extends.html)
+* [The `macro` function](tests/04-macro.html)
+
+- - -
+
 ## Get Started
 
 ### 1. Include Script

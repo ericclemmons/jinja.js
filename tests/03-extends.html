@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="../lib/jinja.min.js"></script>
+        <script src="../lib/jinja.jquery.js"></script>
+    </head>
+    <body>
+        <script type="text/jinja" id="content">
+            {% extends 'layout' %}
+
+            {% block content %}
+            <p>
+                Supports tags like <code>extends</code>!
+            </p>
+            {% endblock %}
+
+            {% block super_content %}
+                Even support for tags like {{ super() }}
+            {% endblock %}
+        </script>
+
+        <script type="text/jinja" id="layout">
+            <h1>Welcome to {{ title|capitalize}}!</h1>
+
+            {% block content %}Default Content{% endblock %}
+
+            {% block super_content %}
+                 <code>super</code>!
+            {% endblock super_content %}
+        </script>
+
+        <script>
+            $('#content').jinja({ title: 'jinja.js' });
+        </script>
+    </body>
+</html>
