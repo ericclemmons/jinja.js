@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="../lib/jinja.min.js"></script>
+        <script src="../lib/jinja.jquery.js"></script>
+    </head>
+    <body>
+        <script type="text/jinja" id="content">
+            {% include 'title' %}
+
+            <p>
+                Supports tags like <code>include</code>!
+            </p>
+        </script>
+
+        <script type="text/jinja" id="title">
+            <h1>Welcome to {{ title|capitalize}}!</h1>
+        </script>
+
+        <script>
+            $('#content').jinja({ title: 'jinja.js' });
+        </script>
+    </body>
+</html>

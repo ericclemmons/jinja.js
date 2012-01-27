@@ -1,0 +1,30 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$( cd $DIR && cd .. && pwd )";
+BUILD_DIR="$( cd $DIR && cd ../build && pwd )";
+BUILD_FILE="$BUILD_DIR/build.js";
+RELEASE_FILE="$BUILD_DIR/build.min.js";
+
+npm install -d $ROOT_DIR
+
+# Convert node environment to browser-friendly environment
+browserify  $ROOT_DIR/node_modules/jinjs/lib/environment.js \
+            $ROOT_DIR/node_modules/jinjs/lib/parser.js      \
+            $ROOT_DIR/node_modules/jinjs/lib/utils.js       \
+            $ROOT_DIR/node_modules/jinjs/lib/filters.js     \
+            -o $BUILD_FILE
+
+# Replace hard-coded references to "../lib/" to just "/"
+sed -ie "s=../lib/=/=g" $BUILD_FILE
+
+# Append bootstrap
+cat "$ROOT_DIR/lib/bootstrap.js" >> $BUILD_FILE
+
+# Compess with semi-colon preservation
+java -jar $DIR/yuicompressor-2.4.7.jar --nomunge $BUILD_FILE -o $RELEASE_FILE
+
+# Remove build artifact
+rm "${BUILD_FILE}e"
+
+echo && echo "Finished!"

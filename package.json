@@ -1,0 +1,20 @@
+{
+  "name": "jinja.js",
+  "description": "Twig/Jinja/JinJS Client-Side Templating + jQuery Plugin",
+  "version": "0.1.0",
+  "author": "Eric Clemmons <eric@smarterspam.com>",
+  "contributors": [],
+  "dependencies": {
+    "browserify": "1.9.3",
+    "jinjs": "0.3.4"
+  },
+  "keywords": ["twig", "jinja", "jinjs", "jquery", "template"],
+  "repository": "git://github.com/visionmedia/express",
+  "main": "index",
+  "bin": { "express": "./bin/express" },
+  "scripts": {
+    "prepublish" : "npm prune",
+    "test": "make test"
+  },
+  "engines": { "node":">= 0.4" }
+}

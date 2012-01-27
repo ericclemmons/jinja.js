@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <script src="../lib/jinja.min.js"></script>
+    </head>
+    <body>
+        <script type="text/jinja" id="standalone">
+            <h1>Welcome to {{ title|capitalize}}!</h1>
+        </script>
+
+        <script>
+            var script      = document.getElementById('standalone');
+            var template    = script.innerHTML;
+            var context     = { title: 'jinja.js' };
+            var content     = Jinja.render(template, context);
+
+            document.write(content);
+            // or
+            var container = document.createElement('div');
+            container.innerHTML = content;
+            script.parentNode.replaceChild(container, script);
+        </script>
+    </body>
+</html>
