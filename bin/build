@@ -9,7 +9,8 @@ RELEASE_FILE="$BUILD_DIR/build.min.js";
 npm install -d $ROOT_DIR
 
 # Convert node environment to browser-friendly environment
-browserify  $ROOT_DIR/node_modules/jinjs/lib/environment.js \
+$ROOT_DIR/node_modules/.bin/browserify                      \
+            $ROOT_DIR/node_modules/jinjs/lib/environment.js \
             $ROOT_DIR/node_modules/jinjs/lib/parser.js      \
             $ROOT_DIR/node_modules/jinjs/lib/utils.js       \
             $ROOT_DIR/node_modules/jinjs/lib/filters.js     \
