@@ -813,7 +813,7 @@ require.define("/lexer.js", function (require, module, exports, __dirname, __fil
 
 require.define("/nodes.js", function (require, module, exports, __dirname, __filename) {
 (function(){
-  var make_expression, make_parse_rule, parse_for, parse_let, parse_macro, parse_extends, parse_block, parse_import, parse_string, Node, NodeBasic, NodeComment, NodeList, NodePrint, NodeTag, NodeExtends, NodeImport, NodeFromImport, NodeInclude, NodeAbspath, NodeLet, NodeDo, NodeTagContainer, NodeMacro, NodeBlock, NodeElse, NodeElseIf, NodeIf, NodeElseFor, NodeContinue, NodeBreak, NodeFor;
+  var make_expression, make_parse_rule, parse_for, parse_let, parse_macro, parse_extends, parse_block, parse_import, parse_string, Node, NodeBasic, NodeComment, NodeList, NodePrint, NodeTag, NodeExtends, NodeImport, NodeFromImport, NodeInclude, NodeAbspath, NodeLet, NodeDo, NodeTagContainer, NodeMacro, NodeCall, NodeBlock, NodeElse, NodeElseIf, NodeElIf, NodeIf, NodeElseFor, NodeContinue, NodeBreak, NodeFor;
   make_expression = require('./expression').parse;
   make_parse_rule = function(rule_name){
     return function(contents, ctx){
@@ -907,7 +907,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
     }
     prototype.compile = (function(){
       function compile(opts, ctx){
-        return this.cur(opts) + "_res += '" + escape(this.contents) + "';";
+        return "_res += '" + escape(this.contents) + "';";
       }
       return compile;
     }());
@@ -928,7 +928,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
     }
     prototype.compile = (function(){
       function compile(opts, ctx){
-        return this.cur(opts) + "/*" + this.contents + "*/";
+        return "/*" + this.contents + "*/";
       }
       return compile;
     }());
@@ -991,7 +991,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
     }
     prototype.compile = (function(){
       function compile(opts, ctx){
-        return this.cur(opts) + "_res += ((_ref = " + make_expression(this.contents, ctx) + ") !== undefined && _ref !== null ? _ref : '').toString();";
+        return "_res += ((_ref = " + make_expression(this.contents, ctx) + ") !== undefined && _ref !== null ? _ref : '').toString();";
       }
       return compile;
     }());
@@ -1034,9 +1034,9 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
         opts['extends'] = true;
         tpl_name = parse_extends(this.contents, opts);
         if (template_expr_is_string(tpl_name)) {
-          return this.cur(opts) + "__extends__ = require(" + tpl_name + ");";
+          return "__extends__ = require(" + tpl_name + ");";
         } else {
-          return this.cur(opts) + "__extends__ = " + tpl_name + "; " + this.cur(opts) + "if (__extends__ === null || __extends__ === undefined) throw new Error ('Cant extend a null template.');";
+          return "__extends__ = " + tpl_name + ";\nif (__extends__ === null || __extends__ === undefined) throw new Error ('Cant extend a null template.');";
         }
       }
       return compile;
@@ -1055,13 +1055,13 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
         var tpl, as, imports, with_context, result;
         tpl = parse_import.tpl, as = parse_import.as, imports = parse_import.imports, with_context = parse_import.with_context;
         opts['clone'] = true;
-        result = this.cur(opts) + "(function(){ " + this.ind(opts) + "var __new_ctx = " + (!with_context ? '{}' : '__import({}, $$)') + ";// __new_ctx now gets populated with the new exported variables." + this.cur(opts) + "require(" + tpl + ").render(__new_ctx);";
+        result = "(function(){\nvar __new_ctx = " + (!with_context ? '{}' : '__import({}, $$)') + ";\n// __new_ctx now gets populated with the new exported variables.\nrequire(" + tpl + ").render(__new_ctx);";
         if (as) {
-          result += common + "" + this.cur(opts) + "$$." + as + " = __new_ctx;";
+          result += common + "$$." + as + " = __new_ctx;";
         } else {
-          result += this.cur(opts) + "var names = ['" + imports.join("', '") + "'];" + this.cur(opts) + "for (var i = 0; i < names.length; i++) {" + this.ind(opts) + "$$[names[i]] = __new_ctx[names[i]];" + this.ded(opts) + "}";
+          result += "var names = ['" + imports.join("', '") + "'];\nfor (var i = 0; i < names.length; i++) {\n    $$[names[i]] = __new_ctx[names[i]];\n}";
         }
-        result += this.ded(opts) + "})();";
+        result += "})();";
         return result;
       }
       return compile;
@@ -1096,7 +1096,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
         } else {
           tpl_exp = tpl_name;
         }
-        return this.cur(opts) + "_res += (" + tpl_exp + ").render($$);";
+        return "_res += (" + tpl_exp + ").render($$);";
       }
       return compile;
     }());
@@ -1119,18 +1119,18 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
         } else {
           tpl_exp = template;
         }
-        result = this.cur(opts) + "(function(){ ";
+        result = "(function(){ ";
         if (with_context) {
-          result += this.ind(opts) + "var __new_ctx = __import({}, $$);// __new_ctx now gets populated with the new exported variables." + this.cur(opts) + "(" + tpl_exp + ").render(__new_ctx);";
+          result += "var __new_ctx = __import({}, $$);\n// __new_ctx now gets populated with the new exported variables.\n(" + tpl_exp + ").render(__new_ctx);";
         } else {
-          result += this.cur(opts) + "var __new_ctx = (" + tpl_exp + ")._cached_ctx();";
+          result += "var __new_ctx = (" + tpl_exp + ")._cached_ctx();";
         }
         if (as_name) {
-          result += this.cur(opts) + "$$." + as_name + " = __new_ctx;";
+          result += "$$." + as_name + " = __new_ctx;";
         } else {
-          result += this.cur(opts) + "var names = ['" + variables.join("', '") + "'];" + this.cur(opts) + "for (var i = 0; i < names.length; i++) {" + this.ind(opts) + "$$[names[i]] = __new_ctx[names[i]];" + this.ded(opts) + "}";
+          result += "var names = ['" + variables.join("', '") + "'];\nfor (var i = 0; i < names.length; i++) {\n    $$[names[i]] = __new_ctx[names[i]];\n}";
         }
-        result += this.ded(opts) + "})();";
+        result += "})();";
         return result;
       }
       return compile;
@@ -1157,7 +1157,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
       function compile(opts, ctx){
         var path;
         path = parse_string(this.contents, ctx);
-        return this.cur(opts) + "_res += _require('path').join(__dirname, " + path + ");";
+        return "_res += _require('path').join(__dirname, " + path + ");";
       }
       return compile;
     }());
@@ -1178,7 +1178,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
         var variable_name, expression, res, _ref;
         _ref = parse_let(this.contents, ctx), variable_name = _ref.variable_name, expression = _ref.expression;
         ctx[variable_name] = true;
-        return res = this.cur(opts) + "var " + variable_name + " = ($$." + variable_name + " = " + expression + ");";
+        return res = "var " + variable_name + " = ($$." + variable_name + " = " + expression + ");";
       }
       return compile;
     }());
@@ -1193,7 +1193,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
     }
     prototype.compile = (function(){
       function compile(opts, ctx){
-        return this.cur(opts) + "" + make_expression(this.contents, ctx) + ";";
+        return make_expression(this.contents, ctx) + ";";
       }
       return compile;
     }());
@@ -1210,8 +1210,12 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
     }
     prototype.child_code = (function(){
       function child_code(opts, ctx){
-        var _ref;
-        return (_ref = (_ref = this.child_node) != null ? _ref.compile(opts, ctx) : void 8) != null ? _ref : "";
+        var ind, _ref;
+        ind = 0;
+        return ((_ref = (_ref = this.child_node) != null ? _ref.compile(opts, ctx) : void 8) != null ? _ref : "").replace(/^/g, function(){
+          ind = ind + 1;
+          return ind == 1 ? "" : "    ";
+        });
       }
       return child_code;
     }());
@@ -1230,15 +1234,15 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
     }
     prototype.init_defaults = (function(){
       function init_defaults(opts, args){
-        var res, a, _i, _len, _results = [];
+        var res, a, _i, _len;
         res = "";
         for (_i = 0, _len = args.length; _i < _len; ++_i) {
           a = args[_i];
           if (a.default_value) {
-            _results.push(res += this.cur(opts) + "" + a.name + " = (" + a.name + " === undefined) ? (" + a.default_value + ") : " + a.name + ";");
+            res += a.name + " = (" + a.name + " === undefined) ? (" + a.default_value + ") : " + a.name + ";";
           }
         }
-        return _results;
+        return res;
       }
       return init_defaults;
     }());
@@ -1246,6 +1250,10 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
       function compile(opts, ctx){
         var args, function_name, backup, argcode, argendcode, a, res, _ref, _i, _len;
         _ref = parse_macro(this.contents, ctx), args = _ref.args, function_name = _ref.function_name;
+        args.push({
+          name: "caller",
+          default_value: "(function(){ return \"\"; })"
+        });
         backup = [];
         argcode = [];
         argendcode = [];
@@ -1260,19 +1268,55 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
           argcode = argcode.join(",") + ";";
           argendcode = argendcode.join(" ");
         }
-        res = this.cur(opts) + "function " + function_name + "(" + (function(){
+        res = "function " + function_name + "(" + (function(){
           var _i, _ref, _len, _results = [];
           for (_i = 0, _len = (_ref = args).length; _i < _len; ++_i) {
             a = _ref[_i];
             _results.push(a.name);
           }
           return _results;
-        }()).join(", ") + ") {" + this.ind(opts) + "var _res = '';" + this.init_defaults(opts, args) + "" + this.cur(opts) + backup + "" + this.cur(opts) + argcode + "" + this.child_code(opts, ctx) + "" + this.cur(opts) + argendcode + "" + this.cur(opts) + "return _res;" + this.ded(opts) + "}" + this.cur(opts) + "$$." + function_name + " = " + function_name + ";";
+        }()).join(", ") + ") {\n    var _res = '';\n    " + this.init_defaults(opts, args) + "\n    " + backup + "\n    " + argcode + "\n    " + this.child_code(opts, ctx) + "\n    " + argendcode + "\n    return _res;\n}\n$$." + function_name + " = " + function_name + ";";
         return res;
       }
       return compile;
     }());
     return NodeMacro;
+  }(NodeTagContainer));
+  NodeCall = (function(_super){
+    NodeCall.displayName = 'NodeCall';
+    var prototype = __extends(NodeCall, _super).prototype, constructor = NodeCall;
+    NodeCall.tag = 'call';
+    NodeCall.until = 'endcall';
+    NodeCall.call_re = /([a-zA-Z$_0-9]+)\s*\(\s*(.*)\s*\)\s*/;
+    function NodeCall(specs){
+      NodeCall.superclass.apply(this, arguments);
+    }
+    prototype.compile = (function(){
+      function compile(opts, ctx){
+        var m, fname, args, a, callerblock, thecall, _res, _i, _ref, _len;
+        m = this.contents.match(NodeCall.call_re);
+        if (!m) {
+          throw new Error("call tag is malformed");
+        }
+        fname = m[1];
+        args = m[2];
+        _res = [];
+        for (_i = 0, _len = (_ref = args.split(",")).length; _i < _len; ++_i) {
+          a = _ref[_i];
+          if (a) {
+            _res.push(a.replace(/^\s*|\s*$/g, ''));
+          }
+        }
+        args = _res;
+        callerblock = "(function () {\n    var _res = '';\n    " + this.child_code(opts, ctx) + "\n    return _res;\n})";
+        args.push(callerblock);
+        args = args.join(", ");
+        thecall = "_res += " + fname + "(" + args + ");";
+        return thecall;
+      }
+      return compile;
+    }());
+    return NodeCall;
   }(NodeTagContainer));
   /**
    *
@@ -1294,7 +1338,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
         opts.__indent__ = 4;
         opts.blocks[block_name] = this.child_code(opts, ctx) + "";
         opts.__indent__ = indent;
-        return this.cur(opts) + "// Adding the current block as the super of the currently defined block with the same name." + this.cur(opts) + "if (_b['" + block_name + "'] !== undefined) {" + this.ind(opts) + "_b['" + block_name + "'] = (function (original) {" + this.ind(opts) + "return function ($$) { var prevsuper = $$.super; $$.super = function() { return __block_" + block_name + "($$); }; var res = original($$);if (prevsuper !== undefined) $$.super = prevsuper; return res; };" + this.ded(opts) + "})(_b['" + block_name + "']);" + this.ded(opts) + "} else { _b['" + block_name + "'] = __block_" + block_name + "; }" + this.cur(opts) + "if (__extends__ === null) _res += _b['" + block_name + "']($$);";
+        return "// Adding the current block as the super of the currently defined block with the same name.\nif (_b['" + block_name + "'] !== undefined) {\n    _b['" + block_name + "'] = (function (original) {\n        return function ($$) {\n            var prevsuper = $$.super;\n            $$.super = function() {\n                return __block_" + block_name + "($$);\n            };\n            var res = original($$);\n            if (prevsuper !== undefined)\n                $$.super = prevsuper;\n            return res; };\n    })(_b['" + block_name + "']);\n} else { _b['" + block_name + "'] = __block_" + block_name + "; }\nif (__extends__ === null) _res += _b['" + block_name + "']($$);\n";
       }
       return compile;
     }());
@@ -1318,7 +1362,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
     prototype.compile = (function(){
       function compile(opts, ctx){
         var res;
-        res = this.ded(opts) + "} else {";
+        res = "} else {";
         this.ind(opts);
         res += this.child_code(opts, ctx) + "";
         return res;
@@ -1344,7 +1388,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
         if (!trim(this.contents)) {
           throw new Error("{% elseif <condition> %}: condition can't be empty.");
         }
-        res = this.ded(opts) + "} else if (" + make_expression(this.contents, ctx) + ") {";
+        res = "} else if (" + make_expression(this.contents, ctx) + ") {";
         this.ind(opts);
         res += this.child_code(opts, ctx) + "";
         return res;
@@ -1353,6 +1397,32 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
     }());
     return NodeElseIf;
   }(NodeTagContainer));
+  NodeElIf = (function(_super){
+    NodeElIf.displayName = 'NodeElIf';
+    var prototype = __extends(NodeElIf, _super).prototype, constructor = NodeElIf;
+    NodeElIf.tag = 'elif';
+    NodeElIf.inside = {
+      elif: NodeElIf,
+      'else': NodeElse
+    };
+    function NodeElIf(specs){
+      NodeElIf.superclass.apply(this, arguments);
+    }
+    prototype.compile = (function(){
+      function compile(opts, ctx){
+        var res;
+        if (!trim(this.contents)) {
+          throw new Error("{% elif <condition> %}: condition can't be empty.");
+        }
+        res = "} else if (" + make_expression(this.contents, ctx) + ") {";
+        this.ind(opts);
+        res += this.child_code(opts, ctx) + "";
+        return res;
+      }
+      return compile;
+    }());
+    return NodeElIf;
+  }(NodeTagContainer));
   NodeIf = (function(_super){
     NodeIf.displayName = 'NodeIf';
     var prototype = __extends(NodeIf, _super).prototype, constructor = NodeIf;
@@ -1360,7 +1430,8 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
     NodeIf.until = 'endif';
     NodeIf.inside = {
       'else': NodeElse,
-      elseif: NodeElseIf
+      elseif: NodeElseIf,
+      elif: NodeElIf
     };
     function NodeIf(specs){
       NodeIf.superclass.apply(this, arguments);
@@ -1371,9 +1442,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
         if (!trim(this.contents)) {
           throw new Error("{% if <condition> %}: condition can't be empty.");
         }
-        res = this.cur(opts) + "if (" + make_expression(this.contents, ctx) + ") {";
-        this.ind(opts);
-        res += this.child_code(opts, ctx) + "" + NodeIf.superclass.prototype.compile.call(this, opts, ctx) + "" + this.ded(opts) + "}";
+        res = "if (" + make_expression(this.contents, ctx) + ") {\n    " + this.child_code(opts, ctx) + "\n    " + NodeIf.superclass.prototype.compile.call(this, this, opts, ctx) + "\n}";
         return res;
       }
       return compile;
@@ -1391,7 +1460,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
     prototype.compile = (function(){
       function compile(opts, ctx){
         var res;
-        res = this.child_code(opts, ctx) + "" + this.ded(opts);
+        res = this.child_code(opts, ctx) + "";
         return res;
       }
       return compile;
@@ -1450,7 +1519,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
         k = "$$['" + key + "']";
         v = value ? "$$['" + value + "']" : "null";
         l = "$$.loop";
-        return this.cur(opts) + "(function() {var _fref = " + condition + " || [], _prev_loop = " + l + ", _prev_key = " + k + ", _prev_value = " + v + ", k = null, v = null, i = 0, l = 0, x = null, last_v = null, last_k = null;" + l + " = { };" + this.cur(opts) + "if (_fref instanceof Array) {l = _fref.length;for (i = 0; i < l; i++) {" + l + ".last = (i == l - 1);" + l + ".first = (i == 0);" + l + ".index0 = i;" + l + ".index = i + 1;" + k + " = _fref[i]; " + (value ? v + " = i;" : "") + "" + this.child_code(opts, ctx) + "}" + this.cur(opts) + "} else {" + l + " = { first: true, last: false };l = Object.keys(_fref).length;for (x in _fref) { if (_fref.hasOwnProperty(x)) {" + l + ".last = (i == l - 1);" + k + " = x;" + (value ? v + " = _fref[x];" : "") + "" + l + ".index0 = i;" + l + ".index = i + 1;" + this.child_code(opts, ctx) + "i += 1;" + l + ".first = false;} }}" + this.cur(opts) + "if (" + l + ".index == undefined) {" + NodeFor.superclass.prototype.compile.call(this, opts, ctx) + "}" + l + " = _prev_loop; " + k + " = _prev_key; " + (value ? v + " = _prev_value;" : "") + "})();";
+        return "(function() {\nvar _fref = " + condition + " || [], _prev_loop = " + l + ", _prev_key = " + k + ", _prev_value = " + v + ", k = null, v = null, i = 0, l = 0, x = null, last_v = null, last_k = null;\n" + l + " = { };\nif (_fref instanceof Array) {\n    l = _fref.length;\n    for (i = 0; i < l; i++) {\n        " + l + ".last = (i == l - 1);\n        " + l + ".first = (i == 0);\n        " + l + ".index0 = i;\n        " + l + ".index = i + 1;\n        " + k + " = _fref[i]; " + (value ? v + " = i;" : "") + "\n        " + this.child_code(opts, ctx) + "\n    }\n} else {\n    " + l + " = { first: true, last: false };\n    l = Object.keys(_fref).length;\n\n    for (x in _fref) { if (_fref.hasOwnProperty(x)) {\n        " + l + ".last = (i == l - 1);\n        " + k + " = x;\n        " + (value ? v + " = _fref[x];" : "") + "\n        " + l + ".index0 = i;\n        " + l + ".index = i + 1;\n        " + this.child_code(opts, ctx) + "\n        i += 1;\n        " + l + ".first = false;\n    } }\n}\nif (" + l + ".index == undefined) {\n    " + NodeFor.superclass.prototype.compile.call(this, this, opts, ctx) + "\n}\n" + l + " = _prev_loop; " + k + " = _prev_key; " + (value ? v + " = _prev_value;" : "") + "\n})();";
       }
       return compile;
     }());
@@ -1470,6 +1539,7 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
   exports.NodeImport = NodeImport;
   exports.NodeFromImport = NodeFromImport;
   exports.NodeContinue = NodeContinue;
+  exports.NodeCall = NodeCall;
   exports.default_nodes = {
     'if': NodeIf,
     'do': NodeDo,
@@ -1483,7 +1553,8 @@ require.define("/nodes.js", function (require, module, exports, __dirname, __fil
     'import': NodeImport,
     'abspath': NodeAbspath,
     'continue': NodeContinue,
-    'break': NodeBreak
+    'break': NodeBreak,
+    'call': NodeCall
   };
   function __repeatString(str, n){
     for (var r = ''; n > 0; (n >>= 1) && (str += str)) if (n & 1) r += str;
