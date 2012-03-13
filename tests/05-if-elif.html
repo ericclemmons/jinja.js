@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="../lib/jinja.min.js"></script>
+        <script src="../lib/jinja.jquery.js"></script>
+    </head>
+    <body>
+        <script type="text/jinja" id="logic">
+        </script>
+
+        <script type="text/jinja" id="content">
+            <p>
+                Supports tags like:
+            </p>
+
+            <ul>
+                {% for token in [1, 2, 3] %}
+                <li>
+                    {% if loop.first %}
+                        if
+                    {% elif not loop.first and not loop.last %}
+                        elif
+                    {% else %}
+                        else
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </script>
+
+        <script>
+            $('#content').jinja();
+        </script>
+    </body>
+</html>
