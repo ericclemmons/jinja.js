@@ -6,7 +6,7 @@
   "contributors": [],
   "dependencies": {
     "browserify": "1.9.3",
-    "jinjs": "0.3.4"
+    "jinjs": "*"
   },
   "keywords": ["twig", "jinja", "jinjs", "jquery", "template"],
   "repository": "git://github.com/visionmedia/express",
