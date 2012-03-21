@@ -9711,6 +9711,7 @@ require("/filters.js");
 require.define('jinja.js', function(require, module, exports) {
     var __initialized   = false;
     var env             = require('/environment').defaultEnvironment;
+    var templateIdMap = {};
 
     exports.init = function() {
         var scripts     = document.getElementsByTagName('script');
@@ -9720,11 +9721,11 @@ require.define('jinja.js', function(require, module, exports) {
 
             if ('text/jinja' === script.getAttribute('type')) {
                 // Setup each template #id with `require`
-                var content = script.innerHTML;
+                templateIdMap[script.id] = script.innerHTML;
 
-                require.define(script.id, function(trequire, tmodule, texports) {
+                require.define(script.id, function(trequire, tmodule, texports, dirname, filename) {
                     texports.render = function(context) {
-                        return exports.render(content, context);
+                        return exports.render(templateIdMap[filename], context);
                     };
                 });
             }
