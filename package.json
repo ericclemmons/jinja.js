@@ -9,7 +9,7 @@
     "jinjs": "*"
   },
   "keywords": ["twig", "jinja", "jinjs", "jquery", "template"],
-  "repository": "git://github.com/visionmedia/express",
+  "repository": "git://github.com/ericclemmons/jinja.js.git",
   "main": "index",
   "bin": { "express": "./bin/express" },
   "scripts": {
